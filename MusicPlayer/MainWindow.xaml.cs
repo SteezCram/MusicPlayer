@@ -109,8 +109,8 @@ namespace MusicPlayer
 
             await _bluetoothPlayer.PlayerInit();
             await _bluetoothPlayer.PlayerMusicList(_viewModel.Musics.ToArray());
+            await _bluetoothPlayer.PlayerMusicMetadata(_currentMusic);            
             await _bluetoothPlayer.MusicGetNote(_currentMusic, 0, 32); // Use the base index of 0 since we init the player before
-            await _bluetoothPlayer.PlayerMusicMetadata(_currentMusic);
             await _bluetoothPlayer.PlayerPlay();
 
             while (true)
@@ -152,14 +152,19 @@ namespace MusicPlayer
                     {
                         int index = 0;
                         int count = _viewModel.Musics.Count;
-                        for (int i = 0; i < count; i++)
-                            if (_viewModel.Musics[i].Title == _currentMusic.Title)
+                        
+                        for (int i = 0; i < count; i++) {
+                            if (_viewModel.Musics[i].Title == _currentMusic.Title) {
                                 index = i;
+                                break;
+                            }
+                        }
 
                         _currentMusic = _viewModel.Musics[(index + 1) % count];
                         _currentNoteIndex = 31;
                         _viewModel.CurrentMusic = _currentMusic;
 
+                        await _bluetoothPlayer.PlayerMusicMetadata(_currentMusic);
                         await _bluetoothPlayer.MusicGetNote(_currentMusic, 0, 32);
                         await _bluetoothPlayer.PlayerPlay();
                     }
@@ -170,14 +175,22 @@ namespace MusicPlayer
                     {
                         int index = 0;
                         int count = _viewModel.Musics.Count;
+                        
                         for (int i = 0; i < count; i++)
+                        {
                             if (_viewModel.Musics[i].Title == _currentMusic.Title)
+                            {
                                 index = i;
+                                break;
+                            }
+                        }
 
-                        _currentMusic = _viewModel.Musics[(index - 1) % count];
+                        int mod = (index - 1 + count) % count;
+                        _currentMusic = _viewModel.Musics[mod];
                         _currentNoteIndex = 31;
                         _viewModel.CurrentMusic = _currentMusic;
 
+                        await _bluetoothPlayer.PlayerMusicMetadata(_currentMusic);
                         await _bluetoothPlayer.MusicGetNote(_currentMusic, 0, 32);
                         await _bluetoothPlayer.PlayerPlay();
                     }
